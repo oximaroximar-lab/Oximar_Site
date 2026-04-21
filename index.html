@@ -279,9 +279,10 @@ function mostrarLista(dados) {
   }
 }
 
-/* DASHBOARD */
+/* DASHBOARD CORRIGIDO (VENCIMENTO REAL FUNCIONANDO) */
 function atualizarDashboard(dados) {
-  const hoje = new Date().toISOString().split("T")[0];
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
 
   let total = 0;
   let vencidos = 0;
@@ -295,10 +296,10 @@ function atualizarDashboard(dados) {
     total++;
 
     const data = new Date(i.validade + "T00:00:00");
-    const dHoje = new Date(hoje + "T00:00:00");
+    data.setHours(0,0,0,0);
 
-    if (data < dHoje) vencidos++;
-    if (i.validade === hoje) vencemHoje++;
+    if (data < hoje) vencidos++;
+    if (data.getTime() === hoje.getTime()) vencemHoje++;
   }
 
   totalClientes.innerText = total;
@@ -306,7 +307,7 @@ function atualizarDashboard(dados) {
   hoje.innerText = vencemHoje;
 }
 
-/* FILTRO CLIQUE */
+/* FILTRO CLIQUE CARDS */
 window.mostrarFiltro = function (tipo) {
   const hoje = new Date().toISOString().split("T")[0];
 
