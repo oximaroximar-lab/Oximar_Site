@@ -2,92 +2,109 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar Sistema</title>
+<title>Oximar App</title>
 
 <style>
 body {
+  margin: 0;
   font-family: Arial;
-  background: #f2f2f2;
-  padding: 20px;
+  background: #eef2f7;
+}
+
+/* HEADER */
+header {
+  background: #2e7d32;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
 }
 
 /* LOGIN */
 #loginBox {
+  width: 90%;
+  max-width: 350px;
+  margin: 80px auto;
   background: white;
   padding: 20px;
-  border-radius: 12px;
-  width: 300px;
-  margin: auto;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+input, button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  font-weight: bold;
 }
 
 /* PAINEL */
 #painel {
   display: none;
+  padding: 15px;
 }
 
-h1 {
-  text-align: center;
-}
-
-/* INPUTS */
-input, button {
-  padding: 10px;
-  margin: 5px;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-/* BOTÃO */
-button {
-  background: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #45a049;
+/* FORM CARD */
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 15px;
 }
 
 /* BUSCA */
 #buscar {
   width: 100%;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid #ccc;
-  font-size: 15px;
-  margin-top: 10px;
 }
 
-/* TABELA */
-table {
-  width: 100%;
+/* LISTA ESTILO APP */
+.item {
   background: white;
-  border-collapse: collapse;
+  padding: 12px;
   margin-top: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-th, td {
-  padding: 10px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
+.item strong {
+  display: block;
+  font-size: 16px;
 }
 
-th {
-  background: #4CAF50;
-  color: white;
+.item small {
+  color: gray;
+}
+
+.item button {
+  background: red;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
 }
 </style>
 </head>
 
 <body>
 
+<header>📦 Oximar Sistema</header>
+
 <!-- LOGIN -->
 <div id="loginBox">
-  <h2>🔐 Login Oximar</h2>
+  <h3>Login Funcionário</h3>
   <input id="email" placeholder="Email">
   <input id="senha" type="password" placeholder="Senha">
   <button onclick="entrar()">Entrar</button>
@@ -96,27 +113,18 @@ th {
 <!-- PAINEL -->
 <div id="painel">
 
-<h1>📊 Controle Oximar</h1>
+<div class="card">
+  <input id="cliente" placeholder="Cliente">
+  <input id="produto" placeholder="Produto">
+  <input id="validade" type="date">
+  <button onclick="salvar()">Salvar</button>
+</div>
 
-<input id="cliente" placeholder="Cliente">
-<input id="produto" placeholder="Produto">
-<input id="validade" type="date">
-<button onclick="salvar()">Salvar</button>
+<div class="card">
+  <input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
+</div>
 
-<!-- BUSCA -->
-<input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
-
-<table>
-  <thead>
-    <tr>
-      <th>Cliente</th>
-      <th>Produto</th>
-      <th>Validade</th>
-      <th>Ações</th>
-    </tr>
-  </thead>
-  <tbody id="lista"></tbody>
-</table>
+<div id="lista"></div>
 
 </div>
 
@@ -139,7 +147,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* 🔥 FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -155,20 +163,18 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const banco = ref(db, "oximar");
 
-/* 🔥 FORÇA LOGOUT AO ABRIR (corrige entrar direto) */
 signOut(auth);
 
-/* 🔐 LOGIN */
+/* LOGIN */
 window.entrar = function () {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
 
   signInWithEmailAndPassword(auth, email, senha)
-    .then(() => alert("Login realizado!"))
-    .catch((error) => alert(error.message));
+    .catch(e => alert(e.message));
 };
 
-/* 👁️ MOSTRAR / ESCONDER */
+/* PAINEL */
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("loginBox").style.display = "none";
@@ -180,56 +186,50 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-/* 💾 SALVAR */
+/* SALVAR */
 window.salvar = function () {
-  const cliente = document.getElementById("cliente").value;
-  const produto = document.getElementById("produto").value;
-  const validade = document.getElementById("validade").value;
-
   push(banco, {
-    cliente,
-    produto,
-    validade
+    cliente: cliente.value,
+    produto: produto.value,
+    validade: validade.value
   });
 
-  alert("Salvo com sucesso!");
+  alert("Salvo!");
 };
 
-/* 📊 CARREGAR */
+/* CARREGAR */
 function carregar() {
-  onValue(banco, (snapshot) => {
-    const dados = snapshot.val();
+  onValue(banco, (snap) => {
+    const dados = snap.val();
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
     for (let id in dados) {
-      const item = dados[id];
+      const i = dados[id];
 
       lista.innerHTML += `
-        <tr>
-          <td>${item.cliente}</td>
-          <td>${item.produto}</td>
-          <td>${item.validade}</td>
-          <td><button onclick="excluir('${id}')">Excluir</button></td>
-        </tr>
+        <div class="item">
+          <strong>${i.cliente}</strong>
+          <small>${i.produto} | ${i.validade}</small>
+          <button onclick="excluir('${id}')">Excluir</button>
+        </div>
       `;
     }
   });
 }
 
-/* 🗑️ EXCLUIR */
-window.excluir = function (id) {
+/* EXCLUIR */
+window.excluir = (id) => {
   remove(ref(db, "oximar/" + id));
 };
 
-/* 🔎 BUSCA */
+/* BUSCA */
 window.filtrar = function () {
-  const filtro = document.getElementById("buscar").value.toLowerCase();
-  const linhas = document.querySelectorAll("#lista tr");
+  const f = buscar.value.toLowerCase();
+  const itens = document.querySelectorAll(".item");
 
-  linhas.forEach((linha) => {
-    const texto = linha.innerText.toLowerCase();
-    linha.style.display = texto.includes(filtro) ? "" : "none";
+  itens.forEach(i => {
+    i.style.display = i.innerText.toLowerCase().includes(f) ? "" : "none";
   });
 };
 
