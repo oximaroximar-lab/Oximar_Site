@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar Sistema</title>
+<title>Oximar App</title>
 
 <style>
 body {
@@ -17,102 +17,80 @@ header {
   color: white;
   padding: 15px;
   text-align: center;
-  font-size: 20px;
-  font-weight: bold;
 }
 
-/* LOGIN */
-#loginBox {
-  width: 90%;
-  max-width: 350px;
-  margin: 80px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
+/* TELAS */
+.tela { display: none; padding: 15px; }
+.ativa { display: block; }
 
-/* PAINEL */
-#painel {
-  display: none;
-  padding: 15px;
-}
-
-/* INPUTS */
-input, button {
+/* MENU APP */
+.menu {
+  position: fixed;
+  bottom: 0;
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  display: flex;
+  background: white;
+  border-top: 1px solid #ccc;
 }
 
-button {
-  background: #2e7d32;
-  color: white;
+.menu button {
+  flex: 1;
+  padding: 15px;
   border: none;
-  font-weight: bold;
+  background: none;
+  font-size: 18px;
 }
 
 /* DASHBOARD */
 .dashboard {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
 }
 
 .card {
   flex: 1;
-  min-width: 120px;
   background: white;
   padding: 15px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.card:hover {
-  transform: scale(1.03);
+.red { border-left: 5px solid red; }
+.yellow { border-left: 5px solid orange; }
+
+/* PRODUTOS */
+.produtos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 
-.card h3 {
-  margin: 0;
-  font-size: 22px;
+.produto {
+  background: #2f5f7c;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.card p {
-  margin: 5px 0 0;
-  color: gray;
-}
-
-.red {
-  border-left: 5px solid red;
-}
-
-.yellow {
-  border-left: 5px solid orange;
-}
-
-/* BUSCA */
-#buscar {
+.produto img {
   width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
+  height: 120px;
+  object-fit: cover;
 }
 
-/* ITEM CLIENTES */
+.titulo {
+  background: #8bc34a;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
+
+/* LISTA */
 .item {
   background: white;
   padding: 12px;
   margin-top: 10px;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .vencido {
@@ -121,272 +99,162 @@ button {
 }
 
 .atraso {
+  color: red;
   font-size: 12px;
-  margin-top: 4px;
-  color: #b30000;
-  font-weight: bold;
 }
 
-/* PRODUTOS */
-.grid-produtos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.produto-card {
-  background: white;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.produto-card:hover {
-  transform: scale(1.05);
-}
-
-.produto-card img {
+/* INPUT */
+input, button {
   width: 100%;
-  height: 120px;
-  object-fit: cover;
-}
-
-.label {
-  background: #7cb342;
-  color: white;
-  text-align: center;
   padding: 10px;
-  font-weight: bold;
+  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<header>📦 Oximar Sistema</header>
-
-<!-- LOGIN -->
-<div id="loginBox">
-  <h3>Login Funcionário</h3>
-  <input id="email" placeholder="Email">
-  <input id="senha" type="password" placeholder="Senha">
-  <button onclick="entrar()">Entrar</button>
-</div>
-
-<!-- PAINEL -->
-<div id="painel">
+<header>📦 Oximar</header>
 
 <!-- DASHBOARD -->
-<div class="dashboard">
-
-  <div class="card" onclick="mostrarFiltro('todos')">
-    <h3 id="totalClientes">0</h3>
-    <p>Total Clientes</p>
+<div id="dashboard" class="tela ativa">
+  <div class="dashboard">
+    <div class="card" onclick="mostrarFiltro('todos')">
+      <h3 id="totalClientes">0</h3>
+      <p>Total</p>
+    </div>
+    <div class="card red" onclick="mostrarFiltro('vencidos')">
+      <h3 id="vencidos">0</h3>
+      <p>Vencidos</p>
+    </div>
+    <div class="card yellow" onclick="mostrarFiltro('hoje')">
+      <h3 id="hoje">0</h3>
+      <p>Hoje</p>
+    </div>
   </div>
-
-  <div class="card red" onclick="mostrarFiltro('vencidos')">
-    <h3 id="vencidos">0</h3>
-    <p>Vencidos</p>
-  </div>
-
-  <div class="card yellow" onclick="mostrarFiltro('hoje')">
-    <h3 id="hoje">0</h3>
-    <p>Vencem Hoje</p>
-  </div>
-
 </div>
 
 <!-- PRODUTOS -->
-<h2>📦 Produtos</h2>
+<div id="produtos" class="tela">
+  <div class="produtos">
 
-<div class="grid-produtos">
+    <div class="produto" onclick="selecionar('Industrial')">
+      <img src="https://i.imgur.com/8Km9tLL.jpg">
+      <div class="titulo">Gases Industriais</div>
+    </div>
 
-  <div class="produto-card" onclick="selecionarCategoria('gases')">
-    <img src="https://via.placeholder.com/300x200?text=Gases+Industriais">
-    <div class="label">Gases Industriais</div>
+    <div class="produto" onclick="selecionar('Medicinal')">
+      <img src="https://i.imgur.com/2DhmtJ4.jpg">
+      <div class="titulo">Gases Medicinais</div>
+    </div>
+
+    <div class="produto" onclick="selecionar('Especiais')">
+      <img src="https://i.imgur.com/1n6hF7F.jpg">
+      <div class="titulo">Gases Especiais</div>
+    </div>
+
+    <div class="produto" onclick="selecionar('Baloes')">
+      <img src="https://i.imgur.com/Vz81Q0F.jpg">
+      <div class="titulo">Gases para balões</div>
+    </div>
+
   </div>
+</div>
 
-  <div class="produto-card" onclick="selecionarCategoria('oxigenio')">
-    <img src="https://via.placeholder.com/300x200?text=Oxigenio">
-    <div class="label">Oxigênio Industrial</div>
-  </div>
-
-  <div class="produto-card" onclick="selecionarCategoria('acetileno')">
-    <img src="https://via.placeholder.com/300x200?text=Acetileno">
-    <div class="label">Acetileno</div>
-  </div>
-
-  <div class="produto-card" onclick="selecionarCategoria('argonio')">
-    <img src="https://via.placeholder.com/300x200?text=Argonio">
-    <div class="label">Argônio</div>
-  </div>
-
-  <div class="produto-card" onclick="selecionarCategoria('nitrogenio')">
-    <img src="https://via.placeholder.com/300x200?text=Nitrogenio">
-    <div class="label">Nitrogênio</div>
-  </div>
-
-  <div class="produto-card" onclick="selecionarCategoria('co2')">
-    <img src="https://via.placeholder.com/300x200?text=CO2">
-    <div class="label">CO2</div>
-  </div>
-
+<!-- CADASTRO -->
+<div id="cadastro" class="tela">
+  <input id="cliente" placeholder="Cliente">
+  <input id="produto" placeholder="Produto">
+  <input id="validade" type="date">
+  <button onclick="salvar()">Salvar</button>
 </div>
 
 <!-- CLIENTES -->
-<input id="cliente" placeholder="Cliente">
-<input id="produto" placeholder="Produto">
-<input id="validade" type="date">
-<button onclick="salvar()">Salvar</button>
-
-<input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
-
-<div id="lista"></div>
-
+<div id="clientes" class="tela">
+  <input id="buscar" placeholder="Buscar..." onkeyup="filtrar()">
+  <div id="lista"></div>
 </div>
 
-<!-- FIREBASE -->
-<script type="module">
+<!-- MENU -->
+<div class="menu">
+  <button onclick="trocarTela('dashboard')">🏠</button>
+  <button onclick="trocarTela('produtos')">📦</button>
+  <button onclick="trocarTela('cadastro')">➕</button>
+  <button onclick="trocarTela('clientes')">📋</button>
+</div>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script>
+let dados = {};
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
-  authDomain: "oximar-28b3f.firebaseapp.com",
-  databaseURL: "https://oximar-28b3f-default-rtdb.firebaseio.com",
-  projectId: "oximar-28b3f",
-  storageBucket: "oximar-28b3f.firebasestorage.app",
-  messagingSenderId: "1348432348",
-  appId: "1:1348432348:web:ffb391f71a71dde10adf19"
-};
+/* NAV */
+function trocarTela(id) {
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+  document.getElementById(id).classList.add("ativa");
+}
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-const banco = ref(db, "oximar");
+/* SELECIONAR PRODUTO */
+function selecionar(tipo) {
+  document.getElementById("produto").value = tipo;
+  trocarTela("cadastro");
+}
 
-signOut(auth);
-
-window.entrar = function () {
-  signInWithEmailAndPassword(auth, email.value, senha.value)
-    .catch(e => alert(e.message));
-};
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginBox.style.display = "none";
-    painel.style.display = "block";
-    carregar();
-  } else {
-    loginBox.style.display = "block";
-    painel.style.display = "none";
-  }
-});
-
-window.salvar = function () {
-  push(banco, {
+/* SALVAR */
+function salvar() {
+  const id = Date.now();
+  dados[id] = {
     cliente: cliente.value,
     produto: produto.value,
     validade: validade.value
-  });
-};
-
-/* CACHE */
-let cache = {};
-
-function carregar() {
-  onValue(banco, (snap) => {
-    cache = snap.val() || {};
-    atualizarDashboard(cache);
-    mostrarLista(cache);
-  });
+  };
+  atualizar();
 }
 
-function mostrarLista(dados) {
-  lista.innerHTML = "";
-
+/* ATUALIZAR */
+function atualizar() {
   const hoje = new Date();
   hoje.setHours(0,0,0,0);
 
-  for (let id in dados) {
+  let total=0,venc=0,hj=0;
+  lista.innerHTML="";
+
+  for(let id in dados){
     const i = dados[id];
-
-    const p = i.validade.split("-");
-    const data = new Date(p[0], p[1]-1, p[2]);
-    data.setHours(0,0,0,0);
-
-    const diff = Math.floor((hoje - data) / (1000*60*60*24));
-    const vencido = diff > 0;
-
-    lista.innerHTML += `
-      <div class="item ${vencido ? "vencido" : ""}">
-        <strong>${i.cliente}</strong>
-        <small>${i.produto} | ${i.validade}</small>
-        ${vencido ? `<div class="atraso">⚠️ Vencido há ${diff} dia(s)</div>` : ""}
-        <button onclick="excluir('${id}')">Excluir</button>
-      </div>
-    `;
-  }
-}
-
-function atualizarDashboard(dados) {
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-
-  let total=0, vencidos=0, hojeCount=0;
-
-  for (let id in dados) {
-    const i = dados[id];
-    if (!i.validade) continue;
-
     total++;
 
-    const d = new Date(i.validade + "T00:00:00");
+    const d = new Date(i.validade+"T00:00:00");
     d.setHours(0,0,0,0);
 
-    if (d < hoje) vencidos++;
-    if (d.getTime() === hoje.getTime()) hojeCount++;
+    let diff = Math.floor((hoje-d)/(1000*60*60*24));
+    let vencido = diff>0;
+
+    if(vencido) venc++;
+    if(diff===0) hj++;
+
+    lista.innerHTML+=`
+      <div class="item ${vencido?'vencido':''}">
+        <strong>${i.cliente}</strong>
+        <small>${i.produto} | ${i.validade}</small>
+        ${vencido?`<div class="atraso">Vencido há ${diff} dias</div>`:''}
+      </div>`;
   }
 
-  totalClientes.innerText = total;
-  vencidos.innerText = vencidos;
-  hoje.innerText = hojeCount;
+  totalClientes.innerText=total;
+  vencidos.innerText=venc;
+  hoje.innerText=hj;
 }
 
-window.excluir = (id) => {
-  remove(ref(db, "oximar/" + id));
-};
+/* FILTRO */
+function mostrarFiltro(tipo){
+  trocarTela("clientes");
+}
 
-window.mostrarFiltro = function(tipo){
-  const hoje = new Date().toISOString().split("T")[0];
-  let f = {};
-
-  for (let id in cache){
-    const i = cache[id];
-    if (tipo==="todos") f[id]=i;
-    if (tipo==="vencidos" && i.validade < hoje) f[id]=i;
-    if (tipo==="hoje" && i.validade === hoje) f[id]=i;
-  }
-
-  mostrarLista(f);
-};
-
-window.filtrar = function(){
-  const f = buscar.value.toLowerCase();
+/* BUSCA */
+function filtrar(){
+  let f=buscar.value.toLowerCase();
   document.querySelectorAll(".item").forEach(i=>{
-    i.style.display = i.innerText.toLowerCase().includes(f)?"":"none";
+    i.style.display=i.innerText.toLowerCase().includes(f)?"":"none";
   });
-};
-
-window.selecionarCategoria = function(cat){
-  alert("Categoria: " + cat);
-};
-
+}
 </script>
 
 </body>
