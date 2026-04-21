@@ -11,6 +11,7 @@ body {
   background: #eef2f7;
 }
 
+/* HEADER */
 header {
   background: #2e7d32;
   color: white;
@@ -38,6 +39,7 @@ header {
   padding: 15px;
 }
 
+/* INPUTS */
 input, button {
   width: 100%;
   padding: 12px;
@@ -95,13 +97,40 @@ button {
   border-left: 5px solid orange;
 }
 
-/* LISTA */
+/* BUSCA */
+#buscar {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
+
+/* ITEM */
 .item {
   background: white;
   padding: 12px;
   margin-top: 10px;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* VENCIDO */
+.vencido {
+  border-left: 6px solid red;
+  background: #ffe5e5;
+}
+
+.vencido strong {
+  color: #b30000;
+}
+
+/* ATRASO */
+.atraso {
+  font-size: 12px;
+  margin-top: 4px;
+  color: #b30000;
+  font-weight: bold;
 }
 
 .item strong {
@@ -119,15 +148,6 @@ button {
   border-radius: 8px;
   border: none;
   color: white;
-}
-
-/* BUSCA */
-#buscar {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
 }
 </style>
 </head>
@@ -147,6 +167,7 @@ button {
 <!-- PAINEL -->
 <div id="painel">
 
+<!-- DASHBOARD -->
 <div class="dashboard">
 
   <div class="card" onclick="mostrarFiltro('todos')">
@@ -166,13 +187,16 @@ button {
 
 </div>
 
+<!-- FORM -->
 <input id="cliente" placeholder="Cliente">
 <input id="produto" placeholder="Produto">
 <input id="validade" type="date">
 <button onclick="salvar()">Salvar</button>
 
+<!-- BUSCA -->
 <input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
 
+<!-- LISTA -->
 <div id="lista"></div>
 
 </div>
@@ -196,7 +220,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -256,24 +280,37 @@ function carregar() {
   });
 }
 
-/* LISTA */
+/* LISTA COM ATRASO */
 function mostrarLista(dados) {
   lista.innerHTML = "";
+
+  const hoje = new Date();
+  hoje.setHours(0,0,0,0);
 
   for (let id in dados) {
     const i = dados[id];
 
+    const partes = i.validade.split("-");
+    const data = new Date(partes[0], partes[1]-1, partes[2]);
+    data.setHours(0,0,0,0);
+
+    const diff = Math.floor((hoje - data) / (1000*60*60*24));
+    const vencido = diff > 0;
+
     lista.innerHTML += `
-      <div class="item">
+      <div class="item ${vencido ? "vencido" : ""}">
         <strong>${i.cliente}</strong>
         <small>${i.produto} | ${i.validade}</small>
+
+        ${vencido ? `<div class="atraso">⚠️ Vencido há ${diff} dia(s)</div>` : ""}
+
         <button onclick="excluir('${id}')">Excluir</button>
       </div>
     `;
   }
 }
 
-/* DASHBOARD (100% CORRIGIDO) */
+/* DASHBOARD */
 function atualizarDashboard(dados) {
   const hoje = new Date();
   hoje.setHours(0,0,0,0);
@@ -289,8 +326,7 @@ function atualizarDashboard(dados) {
 
     total++;
 
-    const p = i.validade.split("-");
-    const data = new Date(p[0], p[1] - 1, p[2]);
+    const data = new Date(i.validade + "T00:00:00");
     data.setHours(0,0,0,0);
 
     if (data < hoje) vencidos++;
@@ -302,7 +338,7 @@ function atualizarDashboard(dados) {
   hoje.innerText = vencemHoje;
 }
 
-/* FILTRO */
+/* FILTRO CARDS */
 window.mostrarFiltro = function (tipo) {
   const hoje = new Date().toISOString().split("T")[0];
 
@@ -312,12 +348,8 @@ window.mostrarFiltro = function (tipo) {
     const i = cache[id];
 
     if (tipo === "todos") filtrado[id] = i;
-
-    if (tipo === "vencidos" && i.validade < hoje)
-      filtrado[id] = i;
-
-    if (tipo === "hoje" && i.validade === hoje)
-      filtrado[id] = i;
+    if (tipo === "vencidos" && i.validade < hoje) filtrado[id] = i;
+    if (tipo === "hoje" && i.validade === hoje) filtrado[id] = i;
   }
 
   mostrarLista(filtrado);
