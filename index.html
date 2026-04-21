@@ -1,57 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-  <title>Oximar</title>
+<meta charset="UTF-8">
+<title>Oximar Controle</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f2f2f2;
+  padding: 20px;
+}
+
+h1 { text-align: center; }
+
+.form {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+input, button {
+  padding: 10px;
+  margin: 5px;
+}
+
+table {
+  width: 100%;
+  background: white;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.vencido { background: #ffcccc; }
+.alerta { background: #fff3cd; }
+</style>
 </head>
+
 <body>
 
-  <h1>Cadastro</h1>
+<h1>Controle Oximar</h1>
 
-  <input type="text" id="nome" placeholder="Nome">
+<div class="form">
+  <input id="cliente" placeholder="Cliente">
+  <input id="produto" placeholder="Produto">
+  <input id="validade" type="date">
   <button onclick="salvar()">Salvar</button>
+</div>
 
-  <h3>Lista</h3>
-  <ul id="lista"></ul>
+<table>
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Produto</th>
+      <th>Validade</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="lista"></tbody>
+</table>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onValue,
+  remove
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
-      authDomain: "oximar-28b3f.firebaseapp.com",
-      databaseURL: "https://oximar-28b3f-default-rtdb.firebaseio.com",
-      projectId: "oximar-28b3f",
-      storageBucket: "oximar-28b3f.firebasestorage.app",
-      messagingSenderId: "1348432348",
-      appId: "1:1348432348:web:ffb391f71a71dde10adf19"
-    };
+// 🔥 SEU FIREBASE CONFIG (coloque o seu aqui)
+const firebaseConfig = {
+  apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
+  authDomain: "oximar-28b3f.firebaseapp.com",
+  databaseURL: "https://oximar-28b3f-default-rtdb.firebaseio.com",
+  projectId: "oximar-28b3f",
+  storageBucket: "oximar-28b3f",
+  messagingSenderId: "1348432348",
+  appId: "1:1348432348:web:ffb391f71a71dde10adf19"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const banco = ref(db, "oximar");
 
-    // salvar
-    window.salvar = function() {
-      let nome = document.getElementById("nome").value;
+// SALVAR
+window.salvar = function () {
+  const cliente = document.getElementById("cliente").value;
+  const produto = document.getElementById("produto").value;
+  const validade = document.getElementById("validade").value;
 
-      set(ref(db, 'clientes/' + nome), {
-        nome: nome
-      });
-    }
+  push(banco, {
+    cliente,
+    produto,
+    validade
+  });
 
-    // mostrar
+  alert("Salvo com sucesso!");
+};
+
+// CARREGAR
+function carregar() {
+  onValue(banco, (snapshot) => {
+    const dados = snapshot.val();
     const lista = document.getElementById("lista");
+    lista.innerHTML = "";
 
-    onValue(ref(db, 'clientes'), (snapshot) => {
-      lista.innerHTML = "";
+    const hoje = new Date().toISOString().split("T")[0];
 
-      snapshot.forEach((child) => {
-        let li = document.createElement("li");
-        li.textContent = child.val().nome;
-        lista.appendChild(li);
-      });
-    });
-  </script>
+    for (let id in dados) {
+      const item = dados[id];
+
+      let classe = "";
+      if (item.validade < hoje) classe = "vencido";
+      else if (item.validade === hoje) classe = "alerta";
+
+      lista.innerHTML += `
+        <tr class="${classe}">
+          <td>${item.cliente}</td>
+          <td>${item.produto}</td>
+          <td>${item.validade}</td>
+          <td><button onclick="excluir('${id}')">Excluir</button></td>
+        </tr>
+      `;
+    }
+  });
+}
+
+// EXCLUIR
+window.excluir = function (id) {
+  remove(ref(db, "oximar/" + id));
+};
+
+carregar();
+</script>
 
 </body>
 </html>
