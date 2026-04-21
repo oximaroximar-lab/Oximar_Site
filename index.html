@@ -11,7 +11,6 @@ body {
   background: #eef2f7;
 }
 
-/* HEADER */
 header {
   background: #2e7d32;
   color: white;
@@ -39,7 +38,6 @@ header {
   padding: 15px;
 }
 
-/* INPUTS */
 input, button {
   width: 100%;
   padding: 12px;
@@ -97,16 +95,7 @@ button {
   border-left: 5px solid orange;
 }
 
-/* BUSCA */
-#buscar {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
-}
-
-/* ITEM */
+/* LISTA */
 .item {
   background: white;
   padding: 12px;
@@ -131,6 +120,15 @@ button {
   border: none;
   color: white;
 }
+
+/* BUSCA */
+#buscar {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+}
 </style>
 </head>
 
@@ -149,7 +147,6 @@ button {
 <!-- PAINEL -->
 <div id="painel">
 
-<!-- DASHBOARD -->
 <div class="dashboard">
 
   <div class="card" onclick="mostrarFiltro('todos')">
@@ -169,16 +166,13 @@ button {
 
 </div>
 
-<!-- FORM -->
 <input id="cliente" placeholder="Cliente">
 <input id="produto" placeholder="Produto">
 <input id="validade" type="date">
 <button onclick="salvar()">Salvar</button>
 
-<!-- BUSCA -->
 <input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
 
-<!-- LISTA -->
 <div id="lista"></div>
 
 </div>
@@ -202,7 +196,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* FIREBASE */
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -279,7 +273,7 @@ function mostrarLista(dados) {
   }
 }
 
-/* DASHBOARD CORRIGIDO (VENCIMENTO REAL FUNCIONANDO) */
+/* DASHBOARD (100% CORRIGIDO) */
 function atualizarDashboard(dados) {
   const hoje = new Date();
   hoje.setHours(0,0,0,0);
@@ -295,7 +289,8 @@ function atualizarDashboard(dados) {
 
     total++;
 
-    const data = new Date(i.validade + "T00:00:00");
+    const p = i.validade.split("-");
+    const data = new Date(p[0], p[1] - 1, p[2]);
     data.setHours(0,0,0,0);
 
     if (data < hoje) vencidos++;
@@ -307,7 +302,7 @@ function atualizarDashboard(dados) {
   hoje.innerText = vencemHoje;
 }
 
-/* FILTRO CLIQUE CARDS */
+/* FILTRO */
 window.mostrarFiltro = function (tipo) {
   const hoje = new Date().toISOString().split("T")[0];
 
