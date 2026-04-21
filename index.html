@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar Controle</title>
+<title>Oximar Sistema</title>
 
 <style>
 body {
@@ -11,59 +11,59 @@ body {
   padding: 20px;
 }
 
-h1 {
+#loginBox {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  margin: auto;
   text-align: center;
 }
 
-.form {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+#painel {
+  display: none;
 }
 
 input, button {
   padding: 10px;
   margin: 5px;
-}
-
-#buscar {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  width: 90%;
 }
 
 table {
   width: 100%;
   background: white;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
 th, td {
   padding: 10px;
-  text-align: center;
   border-bottom: 1px solid #ddd;
+  text-align: center;
 }
-
-.vencido { background: #ffcccc; }
-.alerta { background: #fff3cd; }
 </style>
 </head>
 
 <body>
 
-<h1>Controle Oximar</h1>
-
-<div class="form">
-  <input id="cliente" placeholder="Cliente">
-  <input id="produto" placeholder="Produto">
-  <input id="validade" type="date">
-  <button onclick="salvar()">Salvar</button>
+<!-- LOGIN -->
+<div id="loginBox">
+  <h2>Login Oximar</h2>
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
+  <button onclick="entrar()">Entrar</button>
 </div>
 
-<input type="text" id="buscar" placeholder="Buscar cliente..." onkeyup="filtrar()" />
+<!-- PAINEL -->
+<div id="painel">
+
+<h1>Controle Oximar 📊</h1>
+
+<input id="cliente" placeholder="Cliente">
+<input id="produto" placeholder="Produto">
+<input id="validade" type="date">
+<button onclick="salvar()">Salvar</button>
 
 <table>
   <thead>
@@ -77,8 +77,11 @@ th, td {
   <tbody id="lista"></tbody>
 </table>
 
+</div>
+
 <!-- FIREBASE -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase,
@@ -87,6 +90,12 @@ import {
   onValue,
   remove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // 🔥 SEU FIREBASE CONFIG
 const firebaseConfig = {
@@ -101,9 +110,36 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 const banco = ref(db, "oximar");
 
-// SALVAR
+// 🔐 LOGIN
+window.entrar = function () {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
+  signInWithEmailAndPassword(auth, email, senha)
+    .then(() => {
+      alert("Login OK");
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
+};
+
+// 👁️ MOSTRAR PAINEL
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("painel").style.display = "block";
+    carregar();
+  } else {
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("painel").style.display = "none";
+  }
+});
+
+// 💾 SALVAR
 window.salvar = function () {
   const cliente = document.getElementById("cliente").value;
   const produto = document.getElementById("produto").value;
@@ -118,24 +154,18 @@ window.salvar = function () {
   alert("Salvo com sucesso!");
 };
 
-// CARREGAR
+// 📊 CARREGAR
 function carregar() {
   onValue(banco, (snapshot) => {
     const dados = snapshot.val();
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
-    const hoje = new Date().toISOString().split("T")[0];
-
     for (let id in dados) {
       const item = dados[id];
 
-      let classe = "";
-      if (item.validade < hoje) classe = "vencido";
-      else if (item.validade === hoje) classe = "alerta";
-
       lista.innerHTML += `
-        <tr class="${classe}">
+        <tr>
           <td>${item.cliente}</td>
           <td>${item.produto}</td>
           <td>${item.validade}</td>
@@ -146,23 +176,11 @@ function carregar() {
   });
 }
 
-// EXCLUIR
+// 🗑️ EXCLUIR
 window.excluir = function (id) {
   remove(ref(db, "oximar/" + id));
 };
 
-// BUSCA
-window.filtrar = function () {
-  const filtro = document.getElementById("buscar").value.toLowerCase();
-  const linhas = document.querySelectorAll("#lista tr");
-
-  linhas.forEach((linha) => {
-    const texto = linha.innerText.toLowerCase();
-    linha.style.display = texto.includes(filtro) ? "" : "none";
-  });
-};
-
-carregar();
 </script>
 
 </body>
