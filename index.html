@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar Dashboard</title>
+<title>Oximar Sistema</title>
 
 <style>
 body {
@@ -71,6 +71,12 @@ button {
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.03);
 }
 
 .card h3 {
@@ -146,17 +152,17 @@ button {
 <!-- DASHBOARD -->
 <div class="dashboard">
 
-  <div class="card">
+  <div class="card" onclick="mostrarFiltro('todos')">
     <h3 id="totalClientes">0</h3>
     <p>Total Clientes</p>
   </div>
 
-  <div class="card red">
+  <div class="card red" onclick="mostrarFiltro('vencidos')">
     <h3 id="vencidos">0</h3>
     <p>Vencidos</p>
   </div>
 
-  <div class="card yellow">
+  <div class="card yellow" onclick="mostrarFiltro('hoje')">
     <h3 id="hoje">0</h3>
     <p>Vencem Hoje</p>
   </div>
@@ -196,7 +202,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -212,7 +218,6 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const banco = ref(db, "oximar");
 
-/* evita login automático */
 signOut(auth);
 
 /* LOGIN */
@@ -244,29 +249,37 @@ window.salvar = function () {
   alert("Salvo!");
 };
 
+/* CACHE */
+let cache = {};
+
 /* CARREGAR */
 function carregar() {
   onValue(banco, (snap) => {
-    const dados = snap.val();
-    lista.innerHTML = "";
+    cache = snap.val() || {};
 
-    atualizarDashboard(dados);
-
-    for (let id in dados) {
-      const i = dados[id];
-
-      lista.innerHTML += `
-        <div class="item">
-          <strong>${i.cliente}</strong>
-          <small>${i.produto} | ${i.validade}</small>
-          <button onclick="excluir('${id}')">Excluir</button>
-        </div>
-      `;
-    }
+    atualizarDashboard(cache);
+    mostrarLista(cache);
   });
 }
 
-/* DASHBOARD CORRIGIDO (VENCIMENTOS FUNCIONANDO) */
+/* LISTA */
+function mostrarLista(dados) {
+  lista.innerHTML = "";
+
+  for (let id in dados) {
+    const i = dados[id];
+
+    lista.innerHTML += `
+      <div class="item">
+        <strong>${i.cliente}</strong>
+        <small>${i.produto} | ${i.validade}</small>
+        <button onclick="excluir('${id}')">Excluir</button>
+      </div>
+    `;
+  }
+}
+
+/* DASHBOARD */
 function atualizarDashboard(dados) {
   const hoje = new Date().toISOString().split("T")[0];
 
@@ -275,28 +288,44 @@ function atualizarDashboard(dados) {
   let vencemHoje = 0;
 
   for (let id in dados) {
-    const item = dados[id];
+    const i = dados[id];
 
-    if (!item.validade) continue;
+    if (!i.validade) continue;
 
     total++;
 
-    const dataValidade = new Date(item.validade + "T00:00:00");
-    const dataHoje = new Date(hoje + "T00:00:00");
+    const data = new Date(i.validade + "T00:00:00");
+    const dHoje = new Date(hoje + "T00:00:00");
 
-    if (dataValidade < dataHoje) {
-      vencidos++;
-    }
-
-    if (item.validade === hoje) {
-      vencemHoje++;
-    }
+    if (data < dHoje) vencidos++;
+    if (i.validade === hoje) vencemHoje++;
   }
 
   totalClientes.innerText = total;
   vencidos.innerText = vencidos;
   hoje.innerText = vencemHoje;
 }
+
+/* FILTRO CLIQUE */
+window.mostrarFiltro = function (tipo) {
+  const hoje = new Date().toISOString().split("T")[0];
+
+  let filtrado = {};
+
+  for (let id in cache) {
+    const i = cache[id];
+
+    if (tipo === "todos") filtrado[id] = i;
+
+    if (tipo === "vencidos" && i.validade < hoje)
+      filtrado[id] = i;
+
+    if (tipo === "hoje" && i.validade === hoje)
+      filtrado[id] = i;
+  }
+
+  mostrarLista(filtrado);
+};
 
 /* EXCLUIR */
 window.excluir = (id) => {
