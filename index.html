@@ -11,18 +11,28 @@ body {
   padding: 20px;
 }
 
-h1 { text-align: center; }
+h1 {
+  text-align: center;
+}
 
 .form {
   background: white;
   padding: 15px;
   border-radius: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 input, button {
   padding: 10px;
   margin: 5px;
+}
+
+#buscar {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 table {
@@ -53,6 +63,8 @@ th, td {
   <button onclick="salvar()">Salvar</button>
 </div>
 
+<input type="text" id="buscar" placeholder="Buscar cliente..." onkeyup="filtrar()" />
+
 <table>
   <thead>
     <tr>
@@ -76,13 +88,13 @@ import {
   remove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// 🔥 SEU FIREBASE CONFIG (coloque o seu aqui)
+// 🔥 SEU FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
   databaseURL: "https://oximar-28b3f-default-rtdb.firebaseio.com",
   projectId: "oximar-28b3f",
-  storageBucket: "oximar-28b3f",
+  storageBucket: "oximar-28b3f.firebasestorage.app",
   messagingSenderId: "1348432348",
   appId: "1:1348432348:web:ffb391f71a71dde10adf19"
 };
@@ -137,6 +149,17 @@ function carregar() {
 // EXCLUIR
 window.excluir = function (id) {
   remove(ref(db, "oximar/" + id));
+};
+
+// BUSCA
+window.filtrar = function () {
+  const filtro = document.getElementById("buscar").value.toLowerCase();
+  const linhas = document.querySelectorAll("#lista tr");
+
+  linhas.forEach((linha) => {
+    const texto = linha.innerText.toLowerCase();
+    linha.style.display = texto.includes(filtro) ? "" : "none";
+  });
 };
 
 carregar();
