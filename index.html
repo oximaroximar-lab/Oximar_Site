@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar App</title>
+<title>Oximar Dashboard</title>
 
 <style>
 body {
@@ -29,10 +29,17 @@ header {
   background: white;
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
   text-align: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
+/* PAINEL */
+#painel {
+  display: none;
+  padding: 15px;
+}
+
+/* INPUTS */
 input, button {
   width: 100%;
   padding: 12px;
@@ -48,19 +55,40 @@ button {
   font-weight: bold;
 }
 
-/* PAINEL */
-#painel {
-  display: none;
-  padding: 15px;
+/* DASHBOARD */
+.dashboard {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
 }
 
-/* FORM CARD */
 .card {
+  flex: 1;
+  min-width: 120px;
   background: white;
   padding: 15px;
-  border-radius: 15px;
+  border-radius: 12px;
+  text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 15px;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.card p {
+  margin: 5px 0 0;
+  color: gray;
+}
+
+.red {
+  border-left: 5px solid red;
+}
+
+.yellow {
+  border-left: 5px solid orange;
 }
 
 /* BUSCA */
@@ -69,9 +97,10 @@ button {
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
+  margin-top: 10px;
 }
 
-/* LISTA ESTILO APP */
+/* ITEM */
 .item {
   background: white;
   padding: 12px;
@@ -82,7 +111,6 @@ button {
 
 .item strong {
   display: block;
-  font-size: 16px;
 }
 
 .item small {
@@ -94,6 +122,8 @@ button {
   margin-top: 8px;
   padding: 8px;
   border-radius: 8px;
+  border: none;
+  color: white;
 }
 </style>
 </head>
@@ -113,17 +143,36 @@ button {
 <!-- PAINEL -->
 <div id="painel">
 
-<div class="card">
-  <input id="cliente" placeholder="Cliente">
-  <input id="produto" placeholder="Produto">
-  <input id="validade" type="date">
-  <button onclick="salvar()">Salvar</button>
+<!-- DASHBOARD -->
+<div class="dashboard">
+
+  <div class="card">
+    <h3 id="totalClientes">0</h3>
+    <p>Total Clientes</p>
+  </div>
+
+  <div class="card red">
+    <h3 id="vencidos">0</h3>
+    <p>Vencidos</p>
+  </div>
+
+  <div class="card yellow">
+    <h3 id="hoje">0</h3>
+    <p>Vencem Hoje</p>
+  </div>
+
 </div>
 
-<div class="card">
-  <input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
-</div>
+<!-- FORM -->
+<input id="cliente" placeholder="Cliente">
+<input id="produto" placeholder="Produto">
+<input id="validade" type="date">
+<button onclick="salvar()">Salvar</button>
 
+<!-- BUSCA -->
+<input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
+
+<!-- LISTA -->
 <div id="lista"></div>
 
 </div>
@@ -147,7 +196,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* FIREBASE */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -163,26 +212,24 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const banco = ref(db, "oximar");
 
+/* evita login automático */
 signOut(auth);
 
 /* LOGIN */
 window.entrar = function () {
-  const email = document.getElementById("email").value;
-  const senha = document.getElementById("senha").value;
-
-  signInWithEmailAndPassword(auth, email, senha)
+  signInWithEmailAndPassword(auth, email.value, senha.value)
     .catch(e => alert(e.message));
 };
 
 /* PAINEL */
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("painel").style.display = "block";
+    loginBox.style.display = "none";
+    painel.style.display = "block";
     carregar();
   } else {
-    document.getElementById("loginBox").style.display = "block";
-    document.getElementById("painel").style.display = "none";
+    loginBox.style.display = "block";
+    painel.style.display = "none";
   }
 });
 
@@ -201,8 +248,9 @@ window.salvar = function () {
 function carregar() {
   onValue(banco, (snap) => {
     const dados = snap.val();
-    const lista = document.getElementById("lista");
     lista.innerHTML = "";
+
+    atualizarDashboard(dados);
 
     for (let id in dados) {
       const i = dados[id];
@@ -216,6 +264,38 @@ function carregar() {
       `;
     }
   });
+}
+
+/* DASHBOARD CORRIGIDO (VENCIMENTOS FUNCIONANDO) */
+function atualizarDashboard(dados) {
+  const hoje = new Date().toISOString().split("T")[0];
+
+  let total = 0;
+  let vencidos = 0;
+  let vencemHoje = 0;
+
+  for (let id in dados) {
+    const item = dados[id];
+
+    if (!item.validade) continue;
+
+    total++;
+
+    const dataValidade = new Date(item.validade + "T00:00:00");
+    const dataHoje = new Date(hoje + "T00:00:00");
+
+    if (dataValidade < dataHoje) {
+      vencidos++;
+    }
+
+    if (item.validade === hoje) {
+      vencemHoje++;
+    }
+  }
+
+  totalClientes.innerText = total;
+  vencidos.innerText = vencidos;
+  hoje.innerText = vencemHoje;
 }
 
 /* EXCLUIR */
