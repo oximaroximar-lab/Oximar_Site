@@ -53,16 +53,13 @@ button:hover {
 }
 
 /* BUSCA */
-.search-box {
-  margin: 15px 0;
-}
-
 #buscar {
   width: 100%;
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #ccc;
   font-size: 15px;
+  margin-top: 10px;
 }
 
 /* TABELA */
@@ -107,9 +104,7 @@ th {
 <button onclick="salvar()">Salvar</button>
 
 <!-- BUSCA -->
-<div class="search-box">
-  <input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
-</div>
+<input id="buscar" placeholder="🔎 Buscar cliente..." onkeyup="filtrar()">
 
 <table>
   <thead>
@@ -140,10 +135,11 @@ import {
 import {
   getAuth,
   signInWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* 🔥 SEU FIREBASE CONFIG */
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
@@ -159,17 +155,20 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const banco = ref(db, "oximar");
 
-/* LOGIN */
+/* 🔥 FORÇA LOGOUT AO ABRIR (corrige entrar direto) */
+signOut(auth);
+
+/* 🔐 LOGIN */
 window.entrar = function () {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
 
   signInWithEmailAndPassword(auth, email, senha)
-    .then(() => alert("Login OK"))
+    .then(() => alert("Login realizado!"))
     .catch((error) => alert(error.message));
 };
 
-/* MOSTRAR PAINEL */
+/* 👁️ MOSTRAR / ESCONDER */
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("loginBox").style.display = "none";
@@ -181,7 +180,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-/* SALVAR */
+/* 💾 SALVAR */
 window.salvar = function () {
   const cliente = document.getElementById("cliente").value;
   const produto = document.getElementById("produto").value;
@@ -196,7 +195,7 @@ window.salvar = function () {
   alert("Salvo com sucesso!");
 };
 
-/* CARREGAR */
+/* 📊 CARREGAR */
 function carregar() {
   onValue(banco, (snapshot) => {
     const dados = snapshot.val();
@@ -218,12 +217,12 @@ function carregar() {
   });
 }
 
-/* EXCLUIR */
+/* 🗑️ EXCLUIR */
 window.excluir = function (id) {
   remove(ref(db, "oximar/" + id));
 };
 
-/* BUSCA */
+/* 🔎 BUSCA */
 window.filtrar = function () {
   const filtro = document.getElementById("buscar").value.toLowerCase();
   const linhas = document.querySelectorAll("#lista tr");
