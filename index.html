@@ -5,109 +5,108 @@
 <title>Oximar App</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #eef2f7;
-}
+body { margin:0; font-family:Arial; background:#eef2f7; }
 
 /* HEADER */
 header {
-  background: #2e7d32;
-  color: white;
-  padding: 15px;
-  text-align: center;
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+/* AVISO */
+.aviso {
+  background:#fff3cd;
+  color:#856404;
+  padding:12px;
+  text-align:center;
+  font-size:14px;
+}
+
+/* LOGIN */
+#loginBox {
+  max-width:300px;
+  margin:80px auto;
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
 }
 
 /* TELAS */
-.tela { display: none; padding: 15px; }
-.ativa { display: block; }
+.tela { display:none; padding:15px; }
+.ativa { display:block; }
 
-/* MENU APP */
+/* MENU */
 .menu {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  background: white;
-  border-top: 1px solid #ccc;
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:white;
+  border-top:1px solid #ccc;
 }
-
 .menu button {
-  flex: 1;
-  padding: 15px;
-  border: none;
-  background: none;
-  font-size: 18px;
+  flex:1;
+  padding:15px;
+  border:none;
+  background:none;
 }
 
 /* DASHBOARD */
-.dashboard {
-  display: flex;
-  gap: 10px;
-}
-
+.dashboard { display:flex; gap:10px; }
 .card {
-  flex: 1;
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-  cursor: pointer;
+  flex:1;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
 }
-
-.red { border-left: 5px solid red; }
-.yellow { border-left: 5px solid orange; }
+.red { border-left:5px solid red; }
+.yellow { border-left:5px solid orange; }
 
 /* PRODUTOS */
 .produtos {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
 }
-
 .produto {
-  background: #2f5f7c;
-  border-radius: 20px;
-  overflow: hidden;
+  border-radius:15px;
+  overflow:hidden;
+  background:#2f5f7c;
 }
-
 .produto img {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
+  width:100%;
+  height:120px;
+  object-fit:cover;
 }
-
 .titulo {
-  background: #8bc34a;
-  color: white;
-  text-align: center;
-  padding: 10px;
+  background:#8bc34a;
+  color:white;
+  text-align:center;
+  padding:8px;
 }
 
 /* LISTA */
 .item {
-  background: white;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 12px;
+  background:white;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
 }
-
 .vencido {
-  border-left: 6px solid red;
-  background: #ffe5e5;
+  background:#ffe5e5;
+  border-left:5px solid red;
 }
-
-.atraso {
-  color: red;
-  font-size: 12px;
-}
+.atraso { color:red; font-size:12px; }
 
 /* INPUT */
 input, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+  width:100%;
+  padding:10px;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -116,48 +115,36 @@ input, button {
 
 <header>📦 Oximar</header>
 
+<div class="aviso">⚠️ Configure o Firebase corretamente para o sistema funcionar!</div>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h3>Login</h3>
+  <input id="email" placeholder="Email">
+  <input id="senha" type="password" placeholder="Senha">
+  <button onclick="entrar()">Entrar</button>
+</div>
+
 <!-- DASHBOARD -->
 <div id="dashboard" class="tela ativa">
   <div class="dashboard">
-    <div class="card" onclick="mostrarFiltro('todos')">
-      <h3 id="totalClientes">0</h3>
-      <p>Total</p>
-    </div>
-    <div class="card red" onclick="mostrarFiltro('vencidos')">
-      <h3 id="vencidos">0</h3>
-      <p>Vencidos</p>
-    </div>
-    <div class="card yellow" onclick="mostrarFiltro('hoje')">
-      <h3 id="hoje">0</h3>
-      <p>Hoje</p>
-    </div>
+    <div class="card"><h3 id="totalClientes">0</h3><p>Total</p></div>
+    <div class="card red"><h3 id="vencidos">0</h3><p>Vencidos</p></div>
+    <div class="card yellow"><h3 id="hoje">0</h3><p>Hoje</p></div>
   </div>
 </div>
 
 <!-- PRODUTOS -->
 <div id="produtos" class="tela">
   <div class="produtos">
-
     <div class="produto" onclick="selecionar('Industrial')">
       <img src="https://i.imgur.com/8Km9tLL.jpg">
       <div class="titulo">Gases Industriais</div>
     </div>
-
     <div class="produto" onclick="selecionar('Medicinal')">
       <img src="https://i.imgur.com/2DhmtJ4.jpg">
       <div class="titulo">Gases Medicinais</div>
     </div>
-
-    <div class="produto" onclick="selecionar('Especiais')">
-      <img src="https://i.imgur.com/1n6hF7F.jpg">
-      <div class="titulo">Gases Especiais</div>
-    </div>
-
-    <div class="produto" onclick="selecionar('Baloes')">
-      <img src="https://i.imgur.com/Vz81Q0F.jpg">
-      <div class="titulo">Gases para balões</div>
-    </div>
-
   </div>
 </div>
 
@@ -183,39 +170,80 @@ input, button {
   <button onclick="trocarTela('clientes')">📋</button>
 </div>
 
-<script>
-let dados = {};
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* CONFIG FIREBASE */
+const firebaseConfig = {
+  apiKey: "COLE_AQUI",
+  authDomain: "COLE_AQUI",
+  databaseURL: "COLE_AQUI",
+  projectId: "COLE_AQUI"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const banco = ref(db, "oximar");
+const auth = getAuth(app);
+
+/* LOGIN */
+window.entrar = function(){
+  signInWithEmailAndPassword(auth, email.value, senha.value)
+    .catch(e => alert(e.message));
+};
+
+/* CONTROLE LOGIN */
+onAuthStateChanged(auth,(user)=>{
+  if(user){
+    loginBox.style.display="none";
+    document.querySelector(".aviso").style.display="none";
+    document.querySelectorAll(".tela").forEach(t=>t.style.display="block");
+    carregar();
+  } else {
+    loginBox.style.display="block";
+    document.querySelector(".aviso").style.display="block";
+  }
+});
 
 /* NAV */
-function trocarTela(id) {
-  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+window.trocarTela = function(id){
+  document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
   document.getElementById(id).classList.add("ativa");
-}
+};
 
-/* SELECIONAR PRODUTO */
-function selecionar(tipo) {
-  document.getElementById("produto").value = tipo;
+/* PRODUTO */
+window.selecionar = function(tipo){
+  produto.value = tipo;
   trocarTela("cadastro");
-}
+};
 
 /* SALVAR */
-function salvar() {
-  const id = Date.now();
-  dados[id] = {
+window.salvar = function(){
+  push(banco,{
     cliente: cliente.value,
     produto: produto.value,
     validade: validade.value
-  };
-  atualizar();
+  });
+};
+
+/* CARREGAR */
+function carregar(){
+  onValue(banco,(snap)=>{
+    const dados = snap.val() || {};
+    atualizar(dados);
+  });
 }
 
 /* ATUALIZAR */
-function atualizar() {
+function atualizar(dados){
+  lista.innerHTML="";
+  let total=0,venc=0,hj=0;
+
   const hoje = new Date();
   hoje.setHours(0,0,0,0);
-
-  let total=0,venc=0,hj=0;
-  lista.innerHTML="";
 
   for(let id in dados){
     const i = dados[id];
@@ -243,18 +271,14 @@ function atualizar() {
   hoje.innerText=hj;
 }
 
-/* FILTRO */
-function mostrarFiltro(tipo){
-  trocarTela("clientes");
-}
-
 /* BUSCA */
-function filtrar(){
+window.filtrar = function(){
   let f=buscar.value.toLowerCase();
   document.querySelectorAll(".item").forEach(i=>{
     i.style.display=i.innerText.toLowerCase().includes(f)?"":"none";
   });
-}
+};
+
 </script>
 
 </body>
