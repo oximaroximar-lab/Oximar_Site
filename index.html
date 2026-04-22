@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Oximar App</title>
+<title>Oximar Sistema</title>
 
 <style>
 body { margin:0; font-family:Arial; background:#eef2f7; }
@@ -18,10 +18,8 @@ header {
 /* AVISO */
 .aviso {
   background:#fff3cd;
-  color:#856404;
-  padding:12px;
   text-align:center;
-  font-size:14px;
+  padding:10px;
 }
 
 /* LOGIN */
@@ -30,58 +28,74 @@ header {
   margin:80px auto;
   background:white;
   padding:20px;
-  border-radius:15px;
-  text-align:center;
+  border-radius:10px;
 }
 
 /* TELAS */
-.tela { display:none; padding:15px; }
+.tela { display:none; }
 .ativa { display:block; }
 
-/* MENU */
-.menu {
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  background:white;
-  border-top:1px solid #ccc;
-}
-.menu button {
-  flex:1;
+/* MENU PRINCIPAL */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
   padding:15px;
-  border:none;
-  background:none;
 }
 
-/* DASHBOARD */
-.dashboard { display:flex; gap:10px; }
-.card {
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
+.btn {
+  background:#e0e0e0;
+  padding:25px;
   text-align:center;
+  border-radius:10px;
+  font-size:18px;
+  cursor:pointer;
 }
-.red { border-left:5px solid red; }
-.yellow { border-left:5px solid orange; }
+
+/* TOPO */
+.topo {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#2e7d32;
+  color:white;
+  padding:10px;
+}
+
+/* LISTA */
+.item, .venda {
+  background:white;
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+}
+
+.vencido {
+  background:#ffe5e5;
+  border-left:5px solid red;
+}
+
+.atraso { color:red; font-size:12px; }
 
 /* PRODUTOS */
 .produtos {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
+  padding:10px;
 }
+
 .produto {
-  border-radius:15px;
+  border-radius:10px;
   overflow:hidden;
-  background:#2f5f7c;
 }
+
 .produto img {
   width:100%;
   height:120px;
   object-fit:cover;
 }
+
 .titulo {
   background:#8bc34a;
   color:white;
@@ -89,33 +103,18 @@ header {
   padding:8px;
 }
 
-/* LISTA */
-.item {
-  background:white;
-  padding:10px;
-  margin-top:10px;
-  border-radius:10px;
-}
-.vencido {
-  background:#ffe5e5;
-  border-left:5px solid red;
-}
-.atraso { color:red; font-size:12px; }
-
-/* INPUT */
 input, button {
-  width:100%;
+  width:90%;
+  margin:10px;
   padding:10px;
-  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<header>📦 Oximar</header>
-
-<div class="aviso">⚠️ Configure o Firebase corretamente para o sistema funcionar!</div>
+<header>OXIMAR</header>
+<div class="aviso">⚠️ Configure o Firebase corretamente</div>
 
 <!-- LOGIN -->
 <div id="loginBox">
@@ -125,13 +124,36 @@ input, button {
   <button onclick="entrar()">Entrar</button>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="tela ativa">
-  <div class="dashboard">
-    <div class="card"><h3 id="totalClientes">0</h3><p>Total</p></div>
-    <div class="card red"><h3 id="vencidos">0</h3><p>Vencidos</p></div>
-    <div class="card yellow"><h3 id="hoje">0</h3><p>Hoje</p></div>
+<!-- MENU -->
+<div id="menu" class="tela">
+  <h2 style="text-align:center">OXIMAR GASES</h2>
+
+  <div class="grid">
+    <div class="btn" onclick="trocarTela('clientes')">👥 Clientes</div>
+    <div class="btn" onclick="trocarTela('vendas')">🛒 Venda</div>
+    <div class="btn" onclick="trocarTela('produtos')">📦 Produtos</div>
   </div>
+</div>
+
+<!-- VENDAS -->
+<div id="vendas" class="tela">
+  <div class="topo">
+    <button onclick="trocarTela('menu')">⬅</button>
+    <h3>Vendas</h3>
+    <button onclick="trocarTela('novaVenda')">＋</button>
+  </div>
+  <div id="listaVendas"></div>
+</div>
+
+<!-- NOVA VENDA -->
+<div id="novaVenda" class="tela">
+  <div class="topo">
+    <button onclick="trocarTela('vendas')">⬅</button>
+    <h3>Nova Venda</h3>
+  </div>
+  <input id="clienteVenda" placeholder="Cliente">
+  <input id="valorVenda" placeholder="Valor">
+  <button onclick="salvarVenda()">Registrar Venda</button>
 </div>
 
 <!-- PRODUTOS -->
@@ -148,26 +170,14 @@ input, button {
   </div>
 </div>
 
-<!-- CADASTRO -->
-<div id="cadastro" class="tela">
-  <input id="cliente" placeholder="Cliente">
-  <input id="produto" placeholder="Produto">
-  <input id="validade" type="date">
-  <button onclick="salvar()">Salvar</button>
-</div>
-
 <!-- CLIENTES -->
 <div id="clientes" class="tela">
+  <div class="topo">
+    <button onclick="trocarTela('menu')">⬅</button>
+    <h3>Clientes</h3>
+  </div>
   <input id="buscar" placeholder="Buscar..." onkeyup="filtrar()">
   <div id="lista"></div>
-</div>
-
-<!-- MENU -->
-<div class="menu">
-  <button onclick="trocarTela('dashboard')">🏠</button>
-  <button onclick="trocarTela('produtos')">📦</button>
-  <button onclick="trocarTela('cadastro')">➕</button>
-  <button onclick="trocarTela('clientes')">📋</button>
 </div>
 
 <script type="module">
@@ -176,9 +186,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* CONFIG FIREBASE */
+/* CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
+ apiKey: "AIzaSyA7mX9Zjh6yCgTvwFnlLGD_XMm5KHj8lEY",
   authDomain: "oximar-28b3f.firebaseapp.com",
   databaseURL: "https://oximar-28b3f-default-rtdb.firebaseio.com",
   projectId: "oximar-28b3f",
@@ -189,25 +199,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const banco = ref(db, "oximar");
+const banco = ref(db, "clientes");
 const auth = getAuth(app);
 
 /* LOGIN */
 window.entrar = function(){
   signInWithEmailAndPassword(auth, email.value, senha.value)
-    .catch(e => alert(e.message));
+    .catch(e=>alert(e.message));
 };
 
-/* CONTROLE LOGIN */
 onAuthStateChanged(auth,(user)=>{
   if(user){
     loginBox.style.display="none";
     document.querySelector(".aviso").style.display="none";
     document.querySelectorAll(".tela").forEach(t=>t.style.display="block");
+    trocarTela("menu");
     carregar();
-  } else {
+  }else{
     loginBox.style.display="block";
-    document.querySelector(".aviso").style.display="block";
   }
 });
 
@@ -217,69 +226,60 @@ window.trocarTela = function(id){
   document.getElementById(id).classList.add("ativa");
 };
 
-/* PRODUTO */
-window.selecionar = function(tipo){
-  produto.value = tipo;
-  trocarTela("cadastro");
-};
-
-/* SALVAR */
-window.salvar = function(){
-  push(banco,{
-    cliente: cliente.value,
-    produto: produto.value,
-    validade: validade.value
-  });
-};
-
-/* CARREGAR */
+/* CLIENTES */
 function carregar(){
   onValue(banco,(snap)=>{
-    const dados = snap.val() || {};
-    atualizar(dados);
+    const dados=snap.val()||{};
+    lista.innerHTML="";
+    for(let id in dados){
+      let i=dados[id];
+      lista.innerHTML+=`
+        <div class="item">
+          <strong>${i.cliente}</strong><br>
+          ${i.produto} - ${i.validade}
+        </div>`;
+    }
   });
-}
-
-/* ATUALIZAR */
-function atualizar(dados){
-  lista.innerHTML="";
-  let total=0,venc=0,hj=0;
-
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-
-  for(let id in dados){
-    const i = dados[id];
-    total++;
-
-    const d = new Date(i.validade+"T00:00:00");
-    d.setHours(0,0,0,0);
-
-    let diff = Math.floor((hoje-d)/(1000*60*60*24));
-    let vencido = diff>0;
-
-    if(vencido) venc++;
-    if(diff===0) hj++;
-
-    lista.innerHTML+=`
-      <div class="item ${vencido?'vencido':''}">
-        <strong>${i.cliente}</strong>
-        <small>${i.produto} | ${i.validade}</small>
-        ${vencido?`<div class="atraso">Vencido há ${diff} dias</div>`:''}
-      </div>`;
-  }
-
-  totalClientes.innerText=total;
-  vencidos.innerText=venc;
-  hoje.innerText=hj;
 }
 
 /* BUSCA */
-window.filtrar = function(){
+window.filtrar=function(){
   let f=buscar.value.toLowerCase();
   document.querySelectorAll(".item").forEach(i=>{
     i.style.display=i.innerText.toLowerCase().includes(f)?"":"none";
   });
+};
+
+/* VENDAS */
+let vendas={};
+
+window.salvarVenda=function(){
+  const id=Date.now();
+  vendas[id]={
+    cliente:clienteVenda.value,
+    valor:valorVenda.value,
+    data:new Date().toLocaleDateString()
+  };
+  atualizarVendas();
+  trocarTela("vendas");
+};
+
+function atualizarVendas(){
+  listaVendas.innerHTML="";
+  for(let id in vendas){
+    let v=vendas[id];
+    listaVendas.innerHTML+=`
+      <div class="venda">
+        <strong>${v.cliente}</strong><br>
+        ${v.data}<br>
+        R$ ${v.valor}
+      </div>`;
+  }
+}
+
+/* PRODUTO */
+window.selecionar=function(tipo){
+  alert("Selecionado: "+tipo);
 };
 
 </script>
